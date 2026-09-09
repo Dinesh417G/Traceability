@@ -234,3 +234,37 @@ plan. That is not padding: on a small table a sequential scan genuinely is
 cheaper and Postgres is right to choose one, so asserting index usage against a
 50-row fixture would pass or fail for reasons unrelated to the schema. The
 5M-row figure in the definition of done is a benchmark, not a CI test.
+
+---
+
+## D-010 — OTA ordering is the security property
+
+**Decided.** The update sequence is fixed and the order is deliberate:
+
+1. verify the manifest signature — **before any artifact byte is fetched**;
+2. apply the version decision (downgrade protection, cohort, upgrade path);
+3. fetch artifacts;
+4. verify each artifact's size, then its SHA-256, against the signed manifest;
+5. atomically swap the `current` symlink;
+6. health-probe, and roll back automatically on failure.
+
+Doing 1 before 3 means an attacker who can serve bytes cannot even make the box
+spend bandwidth on their payload. Doing 4 before 5 means a substituted binary is
+caught before it can be linked. Doing 5 by `rename` over a symlink means power
+loss never leaves the box with half of each version.
+
+**Downgrade protection matters more than it looks.** A manifest we signed last
+year is still perfectly signed. Without a version rule, replaying it walks a box
+backwards into a version with a known hole — a valid signature is not a fresh
+one. Downgrades are refused unless the manifest is explicitly marked
+`rollback: true`.
+
+**The offline USB path uses the identical verification code.** There is no
+"trusted because it came from local media" branch. A USB stick found in a car
+park is not a trusted source, and a plant with no internet deserves the same
+integrity guarantees as one with it.
+
+**Rollback keeps the previous release until the new one is proven healthy**, not
+until it is merely installed. If the *first* ever release fails its probe it is
+left in place, because removing it would leave the box with no software at all —
+the least bad option, and one worth stating rather than discovering.

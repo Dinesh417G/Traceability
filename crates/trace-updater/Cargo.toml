@@ -1,6 +1,6 @@
 [package]
 name        = "trace-updater"
-description = "OTA: signed manifests, delta download, atomic apply and rollback."
+description = "OTA: signed manifests, verified artifacts, atomic apply and automatic rollback."
 version.workspace      = true
 edition.workspace      = true
 rust-version.workspace = true
@@ -10,4 +10,29 @@ authors.workspace      = true
 [lints]
 workspace = true
 
+[features]
+# HTTP delivery. The offline USB path needs no HTTP client at all, so a box
+# that is updated only from removable media links neither reqwest nor TLS.
+default = ["http"]
+http    = ["dep:reqwest"]
+
 [dependencies]
+trace-sign = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+chrono     = { workspace = true }
+thiserror  = { workspace = true }
+tracing    = { workspace = true }
+sha2       = { workspace = true }
+hex        = { workspace = true }
+semver     = { workspace = true }
+tokio      = { workspace = true, features = ["fs", "io-util", "process", "time", "macros"] }
+async-trait = { workspace = true }
+reqwest    = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+base64   = { workspace = true }
+# test-util provides the paused clock, so the health-deadline test does not
+# actually sleep for its deadline.
+tokio    = { workspace = true, features = ["rt-multi-thread", "macros", "time", "test-util"] }
