@@ -184,3 +184,53 @@ so nothing is blocked — but the defaults are guesses and should be confirmed.
 | Q8 | Is the first site's Zebra printer networked (TCP 9100) or USB? | TCP 9100 with a file/USB sink fallback |
 | Q9 | Retention policy for measurements | Partitioned monthly, no automatic drop; retention is config |
 | Q10 | Confirm label-at-operation-1 is acceptable for v1 given laser deferral (see D-002) | Assumed yes |
+
+---
+
+## D-008 — Tenant provisioning is a privileged operation
+
+**Decided.** `trace.provision_tenant(code, name)` is the only way to create a
+tenant, and it is `SECURITY DEFINER`.
+
+This is forced by RLS, and it is the right answer rather than a workaround. The
+policy on `trace.tenant` checks `id = current_tenant_id()`, but the id does not
+exist until the row is inserted — so there is deliberately **no application path
+that creates a tenant**. A station cannot provision one, which is exactly the
+posture we want.
+
+The function takes the identity value from the sequence first, sets
+`app.tenant_id` to it transaction-locally, then inserts. Because it replaces the
+caller's tenant context for the rest of the transaction, **provisioning must run
+in a transaction of its own**. The function comment says so, and the test
+fixture does so.
+
+---
+
+## D-009 — One hash chain per unit, spanning both evidence tables
+
+**Decided.** `unit_event` and `measurement` share a single per-unit `chain_seq`
+rather than keeping two parallel chains.
+
+Why: with two chains, deleting a measurement leaves the event chain perfectly
+intact, so half the evidence can be removed without detection. With one
+interleaved chain, removing any row breaks everything recorded after it,
+whichever table it lived in.
+
+Appends take `SELECT ... FOR UPDATE` on the unit row, which serialises writers
+for that unit and makes a duplicate `chain_seq` impossible.
+
+### Gotcha worth knowing: `sqlx::migrate!` staleness
+
+`sqlx::migrate!` embeds migrations at **compile** time, and adding a *new*
+migration file does not reliably invalidate the macro. The symptom is a
+"function does not exist" error for something you just wrote. Force a rebuild of
+`trace-store` (`touch crates/trace-store/src/lib.rs`, or
+`cargo clean -p trace-store`) after adding a migration.
+
+### Note on the recall performance test
+
+The index-usage test seeds 20,000 genealogy rows before asserting on the query
+plan. That is not padding: on a small table a sequential scan genuinely is
+cheaper and Postgres is right to choose one, so asserting index usage against a
+50-row fixture would pass or fail for reasons unrelated to the schema. The
+5M-row figure in the definition of done is a benchmark, not a CI test.

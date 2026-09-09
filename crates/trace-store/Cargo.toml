@@ -1,6 +1,6 @@
 [package]
 name        = "trace-store"
-description = "Postgres repositories, migrations and RLS policies."
+description = "Postgres repositories, migrations and RLS policies for ElectronIx Trace."
 version.workspace      = true
 edition.workspace      = true
 rust-version.workspace = true
@@ -11,3 +11,14 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+trace-core = { workspace = true }
+sqlx       = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+chrono     = { workspace = true }
+thiserror  = { workspace = true }
+tracing    = { workspace = true }
+tokio      = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
