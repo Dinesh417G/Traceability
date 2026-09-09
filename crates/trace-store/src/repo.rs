@@ -535,6 +535,25 @@ impl TenantTx<'_> {
         Ok(id)
     }
 
+    // --------------------------------------------------------- configuration
+
+    /// Create a product.
+    ///
+    /// # Errors
+    /// Returns [`StoreError::Database`] if the model number already exists for
+    /// this tenant, which the unique constraint enforces.
+    pub async fn insert_product(&mut self, model_no: &str, name: &str) -> Result<RowId> {
+        let row = sqlx::query(
+            "INSERT INTO trace.product (tenant_id, model_no, name) VALUES ($1,$2,$3) RETURNING id",
+        )
+        .bind(self.tenant_id)
+        .bind(model_no)
+        .bind(name)
+        .fetch_one(&mut *self.tx)
+        .await?;
+        Ok(row.get::<i64, _>("id"))
+    }
+
     // --------------------------------------------------------------- outbox
 
     /// Enqueue an event for the cloud phase.

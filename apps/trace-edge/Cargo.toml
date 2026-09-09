@@ -11,3 +11,29 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+trace-core    = { workspace = true }
+trace-store   = { workspace = true }
+trace-devices = { workspace = true }
+trace-mark    = { workspace = true }
+trace-license = { workspace = true }
+trace-billing = { workspace = true }
+# The edge pulls signed manifests over HTTPS, or from a USB stick.
+trace-updater = { workspace = true, features = ["http"] }
+trace-sign    = { workspace = true }
+
+axum       = { workspace = true }
+tower-http = { workspace = true }
+tokio      = { workspace = true, features = ["rt-multi-thread", "macros", "signal", "net"] }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+chrono     = { workspace = true }
+thiserror  = { workspace = true }
+anyhow     = { workspace = true }
+tracing    = { workspace = true }
+tracing-subscriber = { workspace = true }
+semver     = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tower = { workspace = true, features = ["util"] }
+sqlx  = { workspace = true }

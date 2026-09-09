@@ -1,6 +1,6 @@
 [package]
 name        = "trace-station"
-description = "Headless station agent: local spool, offline operation, edge reconnect."
+description = "Headless station agent: durable offline spool, edge reconnect, replay."
 version.workspace      = true
 edition.workspace      = true
 rust-version.workspace = true
@@ -11,3 +11,17 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+trace-core = { workspace = true }
+tokio      = { workspace = true, features = ["rt-multi-thread", "macros", "fs", "io-util", "time", "signal"] }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+anyhow     = { workspace = true }
+thiserror  = { workspace = true }
+tracing    = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono     = { workspace = true }
+clap       = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio    = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }

@@ -11,3 +11,11 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+trace-core = { workspace = true }
+clap       = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+anyhow     = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

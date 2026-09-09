@@ -32,9 +32,11 @@ trace-sign     = { path = "crates/trace-sign" }
 trace-store    = { path = "crates/trace-store" }
 trace-devices  = { path = "crates/trace-devices" }
 trace-mark     = { path = "crates/trace-mark" }
-trace-billing  = { path = "crates/trace-billing" }
+# Internal crates with optional HTTP clients default to OFF, so an edge build
+# links no reqwest and no TLS. Control-plane consumers opt in with features.
+trace-billing  = { path = "crates/trace-billing", default-features = false }
 trace-license  = { path = "crates/trace-license" }
-trace-updater  = { path = "crates/trace-updater" }
+trace-updater  = { path = "crates/trace-updater", default-features = false }
 trace-sync     = { path = "crates/trace-sync" }
 
 # --- async runtime / web ---

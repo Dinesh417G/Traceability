@@ -1,6 +1,6 @@
 [package]
 name        = "device-sim"
-description = "Virtual PLC / serial device / printer simulator."
+description = "Virtual instruments and a virtual Zebra printer, so the system is testable with no hardware."
 version.workspace      = true
 edition.workspace      = true
 rust-version.workspace = true
@@ -11,3 +11,11 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+clap    = { workspace = true }
+tokio   = { workspace = true, features = ["rt-multi-thread", "macros", "net", "io-util", "time", "signal"] }
+anyhow  = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }

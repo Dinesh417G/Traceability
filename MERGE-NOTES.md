@@ -63,3 +63,8 @@ work instructions.
 - **Phase 0** — schema and hierarchy named to match MES. No divergence yet.
 - **Phase 1** — `JobCardSource` seam in place; route engine takes a resolved job card.
 - **Phase 2** — natural keys implemented as unique constraints exactly as tabled above.
+- **Phases 3-7** — no new divergence. `trace-billing`, `trace-license` and
+  `trace-updater` were added and hold **no foreign keys into the manufacturing
+  tables**; their only link is `tenant_id`, which keeps them detachable on merge
+  day. The edge service is a composition root over the existing crates and adds
+  no schema of its own.

@@ -39,19 +39,60 @@ cargo run -p trace-edge
 
 ## Workspace
 
-| Crate | Purpose |
-|---|---|
-| `trace-core` | Domain types, route state machine, gates. **No I/O**, heavily unit tested |
-| `trace-store` | Postgres repositories, migrations, RLS, hash chain |
-| `trace-devices` | `DeviceDriver` trait, drivers, virtual device simulators |
-| `trace-mark` | Label templates, binding engine, native ZPL II renderer |
-| `trace-billing` | Stripe control plane → signed entitlements |
-| `trace-license` | Ed25519 entitlement verification, node-locked, grace period |
-| `trace-updater` | OTA: signed manifests, atomic apply, automatic rollback |
-| `trace-sync` | Outbox drain and cloud transport (cloud phase) |
-| `trace-edge` | Axum service, one per plant, serves `/t/{ulid}` |
-| `trace-station` | Headless station agent: offline spool |
-| `route-sim` / `device-sim` | Dry-run routes and fake hardware, no plant required |
+| Crate | Purpose | Tests |
+|---|---|---|
+| `trace-core` | Domain types, route state machine, gates. **No I/O** | 88 |
+| `trace-sign` | Canonical JSON + Ed25519, shared by licensing and OTA | 9 |
+| `trace-store` | Postgres repositories, migrations, RLS, hash chain | 13 |
+| `trace-devices` | `DeviceDriver` trait, drivers, virtual device simulators | 34 |
+| `trace-mark` | Label templates, binding engine, native ZPL II renderer | 36 |
+| `trace-billing` | Stripe control plane → signed entitlements | 29 |
+| `trace-license` | Ed25519 entitlement verification, node-locked, grace period | 16 |
+| `trace-updater` | OTA: signed manifests, atomic apply, automatic rollback | 36 |
+| `trace-sync` | Outbox drain and cloud transport (cloud phase) | — |
+| `trace-edge` | Axum service, one per plant, serves `/t/{ulid}` | 20 |
+| `trace-station` | Headless station agent: durable offline spool | 8 |
+| `route-sim` / `device-sim` | Dry-run routes and fake hardware, no plant required | 12 |
+
+**301 tests**, clippy clean. Integration tests run against a real PostgreSQL
+with the real migrations and a **non-superuser** role, because superusers bypass
+RLS and would make the isolation tests silently vacuous.
+
+## Try it without a plant
+
+```bash
+# Push a unit through a four-operation route: gates, interlock, the lot.
+cargo run -p route-sim -- --verbose
+
+# See what a failing route looks like
+cargo run -p route-sim -- --example > scenario.json
+# edit scenario.json, then:
+cargo run -p route-sim -- --scenario scenario.json
+
+# A virtual torque wrench that fails every 5th part
+cargo run -p device-sim -- instrument --port 4001 --bad-every 5
+
+# A virtual Zebra that prints the ZPL it receives
+cargo run -p device-sim -- printer --port 9100
+```
+
+## Payments and updates
+
+Two features that would normally fight offline-first, and how they were
+reconciled:
+
+- **Stripe** runs in a control plane that the factory box never talks to. What
+  reaches the plant is an Ed25519-signed entitlement, verified locally in
+  microseconds. A lapsed subscription restricts configuration changes and
+  **never stops production** — halting capture would destroy the traceability
+  record for units physically on the line, and those units then cannot ship at
+  all. `Enforcement` has no `Stopped` variant, deliberately.
+- **OTA** verifies the manifest signature *before downloading anything*, checks
+  every artifact's SHA-256 against that signed manifest, swaps an atomic
+  symlink, and rolls back automatically if the new version fails a health probe.
+  Downgrades are refused unless explicitly marked as a rollback, because a
+  manifest signed last year is still perfectly signed. The offline USB path runs
+  the identical verification code.
 
 ## Design rules
 
