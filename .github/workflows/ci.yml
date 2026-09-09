@@ -51,6 +51,12 @@ jobs:
         run: |
           psql -h localhost -U postgres -d trace_test -v ON_ERROR_STOP=1 <<'SQL'
           CREATE ROLE trace_app LOGIN PASSWORD 'trace_app_pw' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+          -- The app role must OWN the database, not merely be granted on it.
+          -- On PostgreSQL 15+ the public schema is owned by pg_database_owner,
+          -- and a non-owner cannot create tables there -- which is where sqlx
+          -- puts _sqlx_migrations. Granting on the database alone fails with
+          -- "permission denied for schema public" before a single migration runs.
+          ALTER DATABASE trace_test OWNER TO trace_app;
           GRANT ALL ON DATABASE trace_test TO trace_app;
           SQL
 

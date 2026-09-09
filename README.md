@@ -21,9 +21,13 @@ returns the complete, auditable history of that unit.
 ## Quick start
 
 ```bash
-# 1. Postgres 16 with a NON-superuser role (superusers bypass RLS)
-createdb trace_dev
+# 1. Postgres 16 with a NON-superuser role that OWNS the database.
+#    Non-superuser because superusers bypass RLS, which would make the
+#    cross-tenant isolation tests silently pass for the wrong reason.
+#    Owner because on PG15+ a non-owner cannot create tables in the public
+#    schema, where sqlx keeps its migration ledger.
 psql -c "CREATE ROLE trace_app LOGIN PASSWORD 'trace_dev_pw' NOSUPERUSER;"
+psql -c "CREATE DATABASE trace_dev OWNER trace_app;"
 
 # 2. Configure
 cp .env.example .env && $EDITOR .env
