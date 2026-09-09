@@ -1,0 +1,104 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/trace-core",
+    "crates/trace-store",
+    "crates/trace-devices",
+    "crates/trace-mark",
+    "crates/trace-billing",
+    "crates/trace-license",
+    "crates/trace-updater",
+    "crates/trace-sync",
+    "apps/trace-edge",
+    "apps/trace-station",
+    "apps/trace-cloud",
+    "tools/route-sim",
+    "tools/device-sim",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "Proprietary"
+authors = ["ElectronIx <engineering@electronix.example>"]
+repository = "https://github.com/dinesh417g/traceability"
+
+[workspace.dependencies]
+# --- internal ---
+trace-core     = { path = "crates/trace-core" }
+trace-store    = { path = "crates/trace-store" }
+trace-devices  = { path = "crates/trace-devices" }
+trace-mark     = { path = "crates/trace-mark" }
+trace-billing  = { path = "crates/trace-billing" }
+trace-license  = { path = "crates/trace-license" }
+trace-updater  = { path = "crates/trace-updater" }
+trace-sync     = { path = "crates/trace-sync" }
+
+# --- async runtime / web ---
+tokio       = { version = "1.53", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "io-util", "signal", "process"] }
+axum        = { version = "0.8", features = ["ws", "macros"] }
+tower       = "0.5"
+tower-http  = { version = "0.6", features = ["trace", "cors", "fs", "limit"] }
+async-trait = "0.1"
+futures     = "0.3"
+
+# --- data ---
+sqlx = { version = "0.9", default-features = false, features = [
+    "runtime-tokio", "tls-rustls-ring", "postgres", "chrono", "uuid", "json", "migrate", "macros",
+] }
+
+# --- serde / config ---
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml       = "1"
+config     = { version = "0.15", default-features = false, features = ["toml"] }
+
+# --- errors / logging ---
+thiserror          = "2"
+anyhow             = "1"
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# --- identity / time ---
+ulid   = { version = "3", features = ["serde"] }
+uuid   = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# --- crypto ---
+ed25519-dalek = { version = "3", features = ["rand_core", "pkcs8"] }
+sha2          = "0.11"
+hmac          = "0.13"
+base64        = "0.23"
+hex           = "0.4"
+rand          = "0.10"
+zeroize       = { version = "1", features = ["derive"] }
+subtle        = "2"
+
+# --- http client ---
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls-tls", "charset", "http2"] }
+
+# --- cli / test ---
+clap     = { version = "4", features = ["derive", "env"] }
+tempfile = "3"
+
+[workspace.lints.rust]
+unsafe_code            = "forbid"
+missing_debug_implementations = "warn"
+unreachable_pub        = "warn"
+
+[workspace.lints.clippy]
+all           = { level = "warn", priority = -1 }
+todo          = "warn"
+dbg_macro     = "warn"
+unwrap_used   = "warn"
+expect_used   = "allow"
+
+[profile.release]
+opt-level     = 2
+lto           = "thin"
+codegen-units = 4
+strip         = "debuginfo"
+
+[profile.dev]
+debug = 1

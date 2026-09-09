@@ -1,0 +1,13 @@
+[package]
+name        = "trace-cloud"
+description = "DEFERRED to the cloud phase. Stub only."
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]

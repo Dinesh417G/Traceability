@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  check:
+    name: fmt + clippy + test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: trace_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Unit tests (no database)
+        run: cargo test --workspace
+
+      - name: Create non-superuser app role
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d trace_test -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE trace_app LOGIN PASSWORD 'trace_app_pw' NOSUPERUSER NOCREATEDB NOCREATEROLE;
+          GRANT ALL ON DATABASE trace_test TO trace_app;
+          SQL
+
+      - name: Integration tests (real Postgres, RLS enforced)
+        env:
+          # A non-superuser role is mandatory: superusers bypass RLS,
+          # which would make the cross-tenant isolation test meaningless.
+          TRACE_TEST_DATABASE_URL: postgres://trace_app:trace_app_pw@localhost:5432/trace_test
+        run: cargo test --workspace -- --include-ignored

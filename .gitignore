@@ -1,0 +1,17 @@
+/target
+**/target
+Cargo.lock.bak
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/testdata/*.key
+/data
+/artifacts
+/staging
+*.log
+.DS_Store
+.idea/
+.vscode/
+node_modules/

@@ -1,0 +1,13 @@
+[package]
+name        = "trace-edge"
+description = "Axum edge service: one per plant. Owns Postgres, devices and the public trace page."
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
