@@ -1,6 +1,6 @@
 [package]
 name        = "trace-billing"
-description = "Stripe billing control plane: checkout, subscriptions, webhooks."
+description = "Stripe billing control plane: checkout, subscriptions, webhooks, entitlement issuance."
 version.workspace      = true
 edition.workspace      = true
 rust-version.workspace = true
@@ -10,4 +10,25 @@ authors.workspace      = true
 [lints]
 workspace = true
 
+[features]
+# The HTTP client is only needed in the control plane. An edge box can depend
+# on the types and the webhook verifier without pulling in reqwest and TLS.
+default = ["http"]
+http    = ["dep:reqwest"]
+
 [dependencies]
+trace-license = { workspace = true }
+trace-sign    = { workspace = true }
+serde         = { workspace = true }
+serde_json    = { workspace = true }
+chrono        = { workspace = true }
+thiserror     = { workspace = true }
+tracing       = { workspace = true }
+hmac          = { workspace = true }
+sha2          = { workspace = true }
+hex           = { workspace = true }
+subtle        = { workspace = true }
+reqwest       = { workspace = true, optional = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }

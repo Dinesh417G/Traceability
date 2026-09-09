@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/trace-core",
+    "crates/trace-sign",
     "crates/trace-store",
     "crates/trace-devices",
     "crates/trace-mark",
@@ -27,6 +28,7 @@ repository = "https://github.com/dinesh417g/traceability"
 [workspace.dependencies]
 # --- internal ---
 trace-core     = { path = "crates/trace-core" }
+trace-sign     = { path = "crates/trace-sign" }
 trace-store    = { path = "crates/trace-store" }
 trace-devices  = { path = "crates/trace-devices" }
 trace-mark     = { path = "crates/trace-mark" }
@@ -76,7 +78,7 @@ zeroize       = { version = "1", features = ["derive"] }
 subtle        = "2"
 
 # --- http client ---
-reqwest = { version = "0.13", default-features = false, features = ["json", "rustls-tls", "charset", "http2"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls", "webpki-roots", "charset", "http2", "form"] }
 
 # --- cli / test ---
 clap     = { version = "4", features = ["derive", "env"] }

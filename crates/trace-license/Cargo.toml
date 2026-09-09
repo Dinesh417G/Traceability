@@ -1,6 +1,6 @@
 [package]
 name        = "trace-license"
-description = "Ed25519 signed entitlements, node-locked, with grace period."
+description = "Ed25519 signed entitlements, node-locked, with a grace period that never stops production."
 version.workspace      = true
 edition.workspace      = true
 rust-version.workspace = true
@@ -11,3 +11,11 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+trace-sign = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+chrono     = { workspace = true }
+thiserror  = { workspace = true }
+tracing    = { workspace = true }
+sha2       = { workspace = true }
+hex        = { workspace = true }

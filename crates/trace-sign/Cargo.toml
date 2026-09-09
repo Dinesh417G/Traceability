@@ -1,0 +1,22 @@
+[package]
+name        = "trace-sign"
+description = "Canonical JSON and Ed25519 detached signatures, shared by licensing and OTA."
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ed25519-dalek = { workspace = true }
+serde         = { workspace = true }
+serde_json    = { workspace = true }
+sha2          = { workspace = true }
+hex           = { workspace = true }
+base64        = { workspace = true }
+thiserror     = { workspace = true }
+rand          = { workspace = true }
+zeroize       = { workspace = true }
