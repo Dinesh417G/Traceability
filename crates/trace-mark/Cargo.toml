@@ -11,3 +11,15 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
+trace-core = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+chrono     = { workspace = true }
+thiserror  = { workspace = true }
+tracing    = { workspace = true }
+tokio      = { workspace = true, features = ["net", "io-util", "time", "fs"] }
+async-trait = { workspace = true }
+
+[dev-dependencies]
+tokio    = { workspace = true, features = ["rt-multi-thread", "macros", "time"] }
+tempfile = { workspace = true }
